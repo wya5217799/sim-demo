@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>DDIC — 4-Agent Kundur System</title>
+<style>
+/* ── CSS Variables ── */
+:root {
+  --bg-primary:   #ffffff;
+  --bg-secondary: #f5f5f4;
+  --bg-info:      #eff6ff;
+  --bg-danger:    #fef2f2;
+  --text-primary:   #1a1a18;
+  --text-secondary: #6b6b68;
+  --text-tertiary:  #9a9a96;
+  --text-info:      #1d4ed8;
+  --text-danger:    #dc2626;
+  --border-primary:   #e2e2df;
+  --border-secondary: #e2e2df;
+  --border-tertiary:  #eeede9;
+  --border-info:      #bfdbfe;
+  --border-danger:    #fecaca;
+  --radius-md: 8px;
+  --font-sans: system-ui, -apple-system, 'Helvetica Neue', sans-serif;
+
+  --color-background-primary:   var(--bg-primary);
+  --color-background-secondary: var(--bg-secondary);
+  --color-background-info:      var(--bg-info);
+  --color-background-danger:    var(--bg-danger);
+  --color-text-primary:         var(--text-primary);
+  --color-text-secondary:       var(--text-secondary);
+  --color-text-tertiary:        var(--text-tertiary);
+  --color-text-info:            var(--text-info);
+  --color-text-danger:          var(--text-danger);
+  --color-border-primary:       var(--border-primary);
+  --color-border-secondary:     var(--border-secondary);
+  --color-border-tertiary:      var(--border-tertiary);
+  --color-border-info:          var(--border-info);
+  --color-border-danger:        var(--border-danger);
+  --border-radius-md: var(--radius-md);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg-primary:   #1c1b19;
+    --bg-secondary: #252421;
+    --bg-info:      #1e3a5f;
+    --bg-danger:    #450a0a;
+    --text-primary:   #e8e7e3;
+    --text-secondary: #9a9890;
+    --text-tertiary:  #6b6a66;
+    --text-info:      #93c5fd;
+    --text-danger:    #f87171;
+    --border-primary:   #333230;
+    --border-secondary: #333230;
+    --border-tertiary:  #2a2927;
+    --border-info:      #1e40af;
+    --border-danger:    #991b1b;
+  }
+}
+
+/* ── Base ── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  font-family: var(--font-sans);
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  min-height: 100vh;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* ── Page chrome ── */
+.page-header {
+  padding: 14px 16px 0;
+}
+
+.back-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 13px;
+  color: var(--text-secondary);
+  text-decoration: none;
+  padding: 6px 0;
+}
+.back-btn:hover { color: var(--text-primary); }
+
+.container {
+  padding: 8px 14px 40px;
+}
+
+/* ── Original DDIC button style ── */
+.xb {
+  background: var(--bg-primary);
+  border: .5px solid var(--border-secondary);
+  border-radius: var(--radius-md);
+  padding: 8px 13px;
+  font-size: 12px;
+  cursor: pointer;
+  color: var(--text-primary);
+  line-height: 1.4;
+  white-space: nowrap;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+.xb:hover, .xb:active { background: var(--bg-secondary); }
+.xb.on {
+  background: var(--bg-info);
+  border-color: var(--border-info);
+  color: var(--text-info);
+}
+
+/* ── Mobile: 2×2 cards ── */
+@media (max-width: 500px) {
+  #cards { grid-template-columns: 1fr 1fr !important; }
+
+  /* Stack header controls vertically on very small screens */
+  .ctrl-row {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+  }
+}
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <a href="index.html" class="back-btn">← 返回</a>
+</div>
+
+<div class="container">
+<h2 class="sr-only" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0)">
+  DDIC multi-agent deep RL system: 4 VSG energy storage agents on the modified Kundur two-area power grid
+</h2>
+
+<div style="padding:.5rem 0">
+  <div class="ctrl-row" style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;gap:8px;flex-wrap:wrap">
+    <div>
+      <div style="font-size:14px;font-weight:500;color:var(--color-text-primary)">DDIC — Distributed Dynamic Inertia-Droop Control</div>
+      <div style="font-size:11px;color:var(--color-text-secondary);margin-top:2px">4 ESS agents · MARL (SAC) · Modified Kundur two-area power system</div>
+    </div>
+    <div style="display:flex;gap:5px;align-items:center;flex-shrink:0;flex-wrap:wrap">
+      <div style="display:flex;border:.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);overflow:hidden">
+        <button class="xb on" id="ncb" onclick="setMode('nc')" style="border:none;border-radius:0;border-right:.5px solid var(--color-border-secondary)">No Control</button>
+        <button class="xb" id="ddb" onclick="setMode('dd')" style="border:none;border-radius:0">DDIC ✦</button>
+      </div>
+      <button class="xb" id="db" onclick="trigDist()">⚡ Disturbance</button>
+      <button class="xb" onclick="resetSim()" title="Reset">↺</button>
+    </div>
+  </div>
+
+  <canvas id="gc" style="width:100%;display:block;border-radius:8px;border:.5px solid var(--color-border-tertiary)"></canvas>
+
+  <div style="display:flex;gap:14px;flex-wrap:wrap;margin:5px 0 3px;font-size:11px;color:var(--color-text-secondary);align-items:center">
+    <span style="display:flex;align-items:center;gap:4px">
+      <span style="width:8px;height:8px;border-radius:50%;background:currentColor;opacity:.4;display:inline-block"></span>
+      Gen / Wind farm
+    </span>
+    <span style="display:flex;align-items:center;gap:4px">
+      <span style="width:12px;height:12px;border-radius:50%;border:2px solid #378ADD;background:none;display:inline-block;flex-shrink:0"></span>
+      ESS agent (RL-controlled)
+    </span>
+    <span>╌ comm. link &nbsp;── power line</span>
+    <span style="color:#E24B4A">⚡ disturbance bus</span>
+  </div>
+
+  <div style="font-size:11px;color:var(--color-text-secondary);margin-bottom:3px">Frequency deviation Δf (Hz) — each ESS node</div>
+  <canvas id="fc" style="width:100%;display:block;border-radius:8px;border:.5px solid var(--color-border-tertiary)"></canvas>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:6px;margin-top:8px" id="cards"></div>
+
+  <div id="sb" style="margin-top:8px;padding:6px 10px;border-radius:var(--border-radius-md);background:var(--color-background-secondary);font-size:11px;color:var(--color-text-secondary)">
+    Select a mode and press ⚡ Disturbance to run the simulation.
+  </div>
+</div>
+</div><!-- /container -->
+
+<script>
+const EC=['#378ADD','#1D9E75','#D85A30','#BA7517'],EL=['ES1','ES2','ES3','ES4'],EB=['Bus 12','Bus 16','Bus 14','Bus 15'];
+const CM=[[0,2],[2,3],[3,1],[1,0]];
+let mode='nc',sT=0,wT=null,dT=null,hist=[[],[],[],[]];
+let gW=640,gH=320,fW=640,fH=170,gp={};
+const gc=document.getElementById('gc'),fc=document.getElementById('fc');
+const gx=gc.getContext('2d'),fx=fc.getContext('2d');
+const dk=()=>window.matchMedia('(prefers-color-scheme:dark)').matches;
+
+function sz(){
+  gW=Math.max(300,gc.getBoundingClientRect().width||640);gH=Math.round(gW*.50);
+  gc.width=gW;gc.height=gH;
+  fW=Math.max(300,fc.getBoundingClientRect().width||640);
+  fc.width=fW;fc.height=fH;cp();
+}
+
+function cp(){
+  const p=15,a1={x:p,y:28,w:gW*.34,h:gH-p-22},a2={x:gW*.38,y:28,w:gW-gW*.38-p,h:gH-p-22};
+  Object.assign(gp,{a1,a2,
+    G1:{x:a1.x+a1.w*.27,y:a1.y+a1.h*.24},G2:{x:a1.x+a1.w*.27,y:a1.y+a1.h*.70},
+    W2:{x:a1.x+a1.w*.70,y:a1.y+a1.h*.47},
+    G3:{x:a2.x+a2.w*.82,y:a2.y+a2.h*.22},W1:{x:a2.x+a2.w*.82,y:a2.y+a2.h*.68},
+    ES:[
+      {x:a2.x+a2.w*.16,y:a2.y+a2.h*.19},
+      {x:a2.x+a2.w*.56,y:a2.y+a2.h*.80},
+      {x:a2.x+a2.w*.20,y:a2.y+a2.h*.76},
+      {x:a2.x+a2.w*.50,y:a2.y+a2.h*.42},
+    ]
+  });
+}
+
+function sdf(i,el){
+  if(el===null||el<0)return 0;
+  const A=[.022,.016,.044,.030],ph=[.3,.7,0,.5];
+  if(mode==='nc'){
+    const f=[.78,.71,.90,.83];
+    return A[i]*Math.sin(2*Math.PI*f[i]*el+ph[i])*Math.exp(-.15*el)+A[i]*.32*Math.cos(2*Math.PI*.26*el+ph[i])*Math.exp(-.07*el);
+  }
+  return A[i]*Math.sin(2*Math.PI*.84*el+ph[i]*.3)*Math.exp(-.72*el);
+}
+
+function shd(i,el){
+  if(!el||el<0||mode!=='dd')return{dH:0,dD:0};
+  const hs=[1,-1,-1,1],ds=[-1,1,-1,1],ha=[170,115,210,150],da=[285,195,310,315];
+  const e=(1-Math.exp(-el*.9))*Math.exp(-.22*el),j=1+.18*Math.sin(2*Math.PI*.45*el+i);
+  return{dH:hs[i]*ha[i]*e*j,dD:ds[i]*da[i]*e*j};
+}
+
+function rr(c,x,y,w,h,r){c.beginPath();c.moveTo(x+r,y);c.lineTo(x+w-r,y);c.arcTo(x+w,y,x+w,y+r,r);c.lineTo(x+w,y+h-r);c.arcTo(x+w,y+h,x+w-r,y+h,r);c.lineTo(x+r,y+h);c.arcTo(x,y+h,x,y+h-r,r);c.lineTo(x,y+r);c.arcTo(x,y,x+r,y,r);c.closePath();}
+
+function dGrid(wc){
+  const c=gx;c.clearRect(0,0,gW,gH);
+  const d=dk(),{a1,a2,G1,G2,W2,G3,W1,ES}=gp,el=dT!==null?sT-dT:null;
+  const as=d?'rgba(255,255,255,.09)':'rgba(0,0,0,.09)';
+  const ls=d?'rgba(255,255,255,.15)':'rgba(0,0,0,.15)';
+  const mu=d?'rgba(180,178,168,.65)':'rgba(90,88,85,.7)';
+  [[a1,'rgba(55,138,221,'+(d?.07:.04)+')'],[a2,'rgba(29,158,117,'+(d?.07:.04)+')']].forEach(([b,f],idx)=>{
+    rr(c,b.x,b.y,b.w,b.h,10);c.fillStyle=f;c.fill();
+    c.setLineDash([5,4]);c.strokeStyle=as;c.lineWidth=1;c.stroke();c.setLineDash([]);
+    c.fillStyle=mu;c.font='500 10px system-ui,sans-serif';c.textAlign='left';c.textBaseline='alphabetic';
+    c.fillText(idx===0?'Area 1':'Area 2',b.x+6,b.y-5);
+  });
+  const ty1=a1.y+a1.h*.30,ty2=a1.y+a1.h*.70;
+  c.strokeStyle=ls;c.lineWidth=2;
+  c.beginPath();c.moveTo(a1.x+a1.w,ty1);c.lineTo(a2.x,ty1);c.moveTo(a1.x+a1.w,ty2);c.lineTo(a2.x,ty2);c.stroke();
+  c.lineWidth=1.5;c.lineCap='round';
+  [[G1,G2],[G1,W2],[G2,W2],
+   [W2,{x:a1.x+a1.w,y:ty1}],[W2,{x:a1.x+a1.w,y:ty2}],
+   [{x:a2.x,y:ty1},ES[0]],[{x:a2.x,y:ty2},ES[2]],
+   [ES[0],G3],[ES[0],ES[3]],
+   [ES[3],ES[2]],[ES[3],W1],[ES[1],W1],[ES[1],ES[3]]
+  ].forEach(([a,b])=>{c.beginPath();c.moveTo(a.x,a.y);c.lineTo(b.x,b.y);c.strokeStyle=ls;c.stroke();});
+  c.lineCap='butt';
+  const da2=wc*18,act=mode==='dd'&&dT!==null&&el!==null&&el<3;
+  CM.forEach(([i,j])=>{
+    c.save();c.setLineDash([7,5]);
+    if(mode==='dd')c.lineDashOffset=-da2;
+    c.lineWidth=mode==='dd'?1.8:1;c.strokeStyle=EC[i];
+    c.globalAlpha=mode==='dd'?(act?.90:.62):.16;
+    c.beginPath();c.moveTo(ES[i].x,ES[i].y);c.lineTo(ES[j].x,ES[j].y);c.stroke();
+    c.restore();
+  });
+  const gr=Math.max(10,gW*.019);
+  [{p:G1,l:'G1',s:'G'},{p:G2,l:'G2',s:'G'},{p:W2,l:'W2',s:'~'},{p:G3,l:'G3',s:'G'},{p:W1,l:'W1',s:'~'}].forEach(({p,l,s})=>{
+    c.beginPath();c.arc(p.x,p.y,gr,0,2*Math.PI);
+    c.fillStyle=d?'rgba(255,255,255,.10)':'rgba(0,0,0,.07)';c.fill();
+    c.strokeStyle=d?'rgba(255,255,255,.22)':'rgba(0,0,0,.22)';c.lineWidth=1;c.stroke();
+    c.fillStyle=mu;c.font=`500 ${Math.round(gr*.88)}px system-ui,sans-serif`;c.textAlign='center';c.textBaseline='middle';c.fillText(s,p.x,p.y);
+    c.font=`10px system-ui,sans-serif`;c.textBaseline='top';c.fillText(l,p.x,p.y+gr+3);c.textBaseline='alphabetic';
+  });
+  const er=Math.max(15,gW*.038);
+  ES.forEach((p,i)=>{
+    const col=EC[i];
+    if(i===2&&el!==null&&el<2.2){c.beginPath();c.arc(p.x,p.y,er+el*80,0,2*Math.PI);c.strokeStyle='#E24B4A';c.globalAlpha=Math.max(0,.65*(1-el/2.2));c.lineWidth=2;c.stroke();c.globalAlpha=1;}
+    if(mode==='dd'&&el!==null&&el<7){const gr2=er+2.5+Math.sin(wc*2.5+i*1.4)*2.5;c.beginPath();c.arc(p.x,p.y,gr2,0,2*Math.PI);c.strokeStyle=col;c.lineWidth=3;c.globalAlpha=.18*(1-el/8)*Math.abs(Math.sin(wc*2+i));c.stroke();c.globalAlpha=1;}
+    c.beginPath();c.arc(p.x,p.y,er,0,2*Math.PI);c.fillStyle=col;c.globalAlpha=.12;c.fill();c.globalAlpha=1;
+    c.strokeStyle=col;c.lineWidth=2;c.stroke();
+    c.fillStyle=col;c.font=`600 ${Math.round(er*.52)}px system-ui,sans-serif`;c.textAlign='center';c.textBaseline='middle';c.fillText(EL[i],p.x,p.y-er*.12);
+    c.font=`${Math.round(er*.38)}px system-ui,sans-serif`;c.globalAlpha=.7;c.fillText(EB[i],p.x,p.y+er*.42);c.globalAlpha=1;c.textBaseline='alphabetic';
+  });
+}
+
+function dFreq(){
+  const c=fx;c.clearRect(0,0,fW,fH);
+  const d=dk(),bg=d?'#181715':'#f7f6f1',gcl=d?'rgba(255,255,255,.04)':'rgba(0,0,0,.04)',zc=d?'rgba(255,255,255,.10)':'rgba(0,0,0,.10)',tx=d?'#7a7874':'#9a9890';
+  c.fillStyle=bg;c.fillRect(0,0,fW,fH);
+  const pl=44,pr=10,pt=10,pb=20,cw=fW-pl-pr,ch=fH-pt-pb,yC=pt+ch/2,yS=ch/.10,TW=10;
+  [-0.04,-0.02,0,.02,.04].forEach(v=>{
+    const y=yC-v*yS;
+    c.beginPath();c.moveTo(pl,y);c.lineTo(fW-pr,y);c.strokeStyle=v===0?zc:gcl;c.lineWidth=v===0?1:.5;c.stroke();
+    c.fillStyle=tx;c.font='9px system-ui,sans-serif';c.textAlign='right';c.textBaseline='middle';
+    c.fillText((v>0?'+':'')+v.toFixed(2),pl-3,y);c.textBaseline='alphabetic';
+  });
+  const st=sT-TW;
+  [0,1,2,3].forEach(i=>{
+    const pts=hist[i].filter(p=>p.t>=st);if(pts.length<2)return;
+    c.beginPath();c.strokeStyle=EC[i];c.lineWidth=1.5;c.lineJoin='round';
+    let f=true;
+    pts.forEach(p=>{const x=pl+(p.t-st)/TW*cw,y=yC-p.df*yS;if(x<pl||x>fW-pr)return;if(f){c.moveTo(x,y);f=false;}else c.lineTo(x,y);});
+    c.stroke();
+  });
+  if(dT!==null){
+    const dx=pl+(dT-st)/TW*cw;
+    if(dx>=pl&&dx<=fW-pr){
+      c.beginPath();c.moveTo(dx,pt);c.lineTo(dx,fH-pb);c.strokeStyle='#E24B4A';c.lineWidth=1;c.setLineDash([3,3]);c.stroke();c.setLineDash([]);
+      c.fillStyle='#E24B4A';c.font='9px system-ui,sans-serif';c.textAlign='left';c.fillText('⚡',dx+2,pt+9);
+    }
+  }
+  c.fillStyle=tx;c.font='9px system-ui,sans-serif';c.textAlign='center';
+  for(let s=0;s<=TW;s+=2)c.fillText(s+'s',pl+s/TW*cw,fH-pb+14);
+  [0,1,2,3].forEach(i=>{const lx=fW-pr-178+i*46;c.fillStyle=EC[i];c.fillRect(lx,pt+1,10,3);c.fillStyle=tx;c.font='9px system-ui,sans-serif';c.textAlign='left';c.fillText(EL[i],lx+12,pt+7);});
+  c.save();c.translate(11,fH/2);c.rotate(-Math.PI/2);c.fillStyle=tx;c.font='9px system-ui,sans-serif';c.textAlign='center';c.fillText('Δf (Hz)',0,0);c.restore();
+}
+
+function updC(el){
+  const cd=document.getElementById('cards');if(!cd)return;
+  cd.innerHTML=[0,1,2,3].map(i=>{
+    const v=sdf(i,el),{dH,dD}=shd(i,el),show=mode==='dd'&&el!==null&&el>.1&&el<9;
+    const hP=Math.min(100,Math.abs(dH)/210*100).toFixed(0),dP=Math.min(100,Math.abs(dD)/315*100).toFixed(0);
+    const hC=dH>=0?EC[i]:'#E24B4A',dC=dD>=0?EC[i]:'#E24B4A';
+    return`<div style="background:var(--color-background-secondary);border:.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);padding:7px 8px"><div style="display:flex;align-items:center;gap:5px;margin-bottom:4px"><span style="width:7px;height:7px;border-radius:50%;background:${EC[i]};flex-shrink:0"></span><span style="font-size:13px;font-weight:500;color:var(--color-text-primary)">${EL[i]}</span><span style="font-size:10px;color:var(--color-text-secondary);margin-left:auto">${EB[i]}</span></div><div style="font-size:11px;color:var(--color-text-secondary);margin-bottom:${show?'4px':'0'}">Δf <span style="color:${EC[i]};font-weight:500">${(v*1e3).toFixed(1)}</span> mHz</div>${show?`<div style="font-size:10px;color:var(--color-text-secondary);margin-bottom:1px">ΔH <span style="color:${hC}">${dH>=0?'+':''}${Math.round(dH)}</span></div><div style="height:3px;background:var(--color-border-tertiary);border-radius:2px;margin-bottom:3px"><div style="height:100%;width:${hP}%;background:${hC};border-radius:2px"></div></div><div style="font-size:10px;color:var(--color-text-secondary);margin-bottom:1px">ΔD <span style="color:${dC}">${dD>=0?'+':''}${Math.round(dD)}</span></div><div style="height:3px;background:var(--color-border-tertiary);border-radius:2px"><div style="height:100%;width:${dP}%;background:${dC};border-radius:2px"></div></div>`:`<div style="font-size:10px;color:var(--color-text-secondary)">${mode==='nc'?'H/D: no adjustment':'Waiting for disturbance'}</div>`}</div>`;
+  }).join('');
+}
+
+function updS(el){
+  const s=document.getElementById('sb');if(!s)return;
+  s.textContent=dT===null?(mode==='nc'?'No control active — press ⚡ Disturbance to simulate a −248 MW load step at Bus 14.':'DDIC active — 4 agents will dynamically redistribute virtual H and D parameters. Press ⚡ Disturbance.'):el<.3?'⚡ Load step applied at Bus 14 (−248 MW). Frequency deviations propagating…':mode==='nc'?`No control — frequencies diverging. ES3 Δf = ${(sdf(2,el)*1e3).toFixed(1)} mHz (nearest to disturbance). Oscillations persist.`:el<4?'DDIC active — agents exchanging Δω via communication links and redistributing virtual H and D. ΣΔH ≈ 0, ΣΔD ≈ 0.':`DDIC converged. Max Δf = ${(Math.max(...[0,1,2,3].map(i=>Math.abs(sdf(i,el))))*1e3).toFixed(2)} mHz across all 4 ESS nodes.`;
+}
+
+let ct=0;
+function loop(ts){
+  if(!wT)wT=ts;const dt=Math.min((ts-wT)/1e3,.04);wT=ts;sT+=dt;
+  const el=dT!==null?sT-dT:null;
+  [0,1,2,3].forEach(i=>{hist[i].push({t:sT,df:sdf(i,el)});if(hist[i].length>900)hist[i].shift();});
+  dGrid(sT);dFreq();
+  if(ts-ct>150){ct=ts;updC(el);updS(el);}
+  requestAnimationFrame(loop);
+}
+
+function setMode(m){
+  mode=m;dT=null;hist=[[],[],[],[]];sT=0;wT=null;
+  document.getElementById('ncb').classList.toggle('on',m==='nc');
+  document.getElementById('ddb').classList.toggle('on',m==='dd');
+  updC(null);updS(null);
+}
+
+function trigDist(){
+  dT=sT;hist=[[],[],[],[]];
+  const b=document.getElementById('db');
+  b.style.cssText='background:var(--color-background-danger);border-color:var(--color-border-danger);color:var(--color-text-danger)';
+  setTimeout(()=>b.style.cssText='',700);
+}
+
+function resetSim(){dT=null;hist=[[],[],[],[]];sT=0;wT=null;updC(null);updS(null);}
+
+setTimeout(()=>{sz();window.addEventListener('resize',sz);requestAnimationFrame(loop);updC(null);updS(null);},50);
+</script>
+</body>
+</html>
