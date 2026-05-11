@@ -1,437 +1,620 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>SAC 训练过程模拟器</title>
+<title>SAC Agent Training — Live Demo</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.31.0/dist/tabler-icons.min.css">
 <style>
-/* ── CSS Variables ── */
 :root {
-  --bg-primary:   #ffffff;
-  --bg-secondary: #f5f5f4;
-  --bg-info:      #eff6ff;
-  --bg-danger:    #fef2f2;
-  --text-primary:   #1a1a18;
-  --text-secondary: #6b6b68;
-  --text-tertiary:  #9a9a96;
-  --text-info:      #1d4ed8;
-  --text-danger:    #dc2626;
-  --border-primary:   #e2e2df;
-  --border-secondary: #e2e2df;
-  --border-tertiary:  #eeede9;
-  --border-info:      #bfdbfe;
-  --border-danger:    #fecaca;
-  --radius-md: 8px;
-  --font-mono: 'SF Mono', 'Fira Code', 'Cascadia Code', ui-monospace, monospace;
-  --font-sans: system-ui, -apple-system, 'Helvetica Neue', sans-serif;
-
-  /* Map to names the snippet uses */
-  --color-background-primary:   var(--bg-primary);
-  --color-background-secondary: var(--bg-secondary);
-  --color-background-info:      var(--bg-info);
-  --color-background-danger:    var(--bg-danger);
-  --color-text-primary:         var(--text-primary);
-  --color-text-secondary:       var(--text-secondary);
-  --color-text-tertiary:        var(--text-tertiary);
-  --color-text-info:            var(--text-info);
-  --color-text-danger:          var(--text-danger);
-  --color-border-primary:       var(--border-primary);
-  --color-border-secondary:     var(--border-secondary);
-  --color-border-tertiary:      var(--border-tertiary);
-  --color-border-info:          var(--border-info);
-  --color-border-danger:        var(--border-danger);
-  --border-radius-md: var(--radius-md);
-  --font-mono: var(--font-mono);
-  --font-sans: var(--font-sans);
+  --bg:       #0d0d0c;
+  --bg2:      #151413;
+  --bg3:      #1c1b19;
+  --surface:  #212120;
+  --border:   #2e2d2b;
+  --border2:  #3a3937;
+  --text:     #e8e7e3;
+  --text2:    #9a9890;
+  --text3:    #6b6a66;
+  --green:    #1D9E75;
+  --blue:     #378ADD;
+  --orange:   #D85A30;
+  --purple:   #7F77DD;
+  --yellow:   #EF9F27;
+  --lime:     #639922;
+  --red:      #E24B4A;
+  --radius:   10px;
+  --mono:     'SF Mono','Fira Code','Cascadia Code',ui-monospace,monospace;
+  --sans:     system-ui,-apple-system,'Helvetica Neue',sans-serif;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --bg-primary:   #1c1b19;
-    --bg-secondary: #252421;
-    --bg-info:      #1e3a5f;
-    --bg-danger:    #450a0a;
-    --text-primary:   #e8e7e3;
-    --text-secondary: #9a9890;
-    --text-tertiary:  #6b6a66;
-    --text-info:      #93c5fd;
-    --text-danger:    #f87171;
-    --border-primary:   #333230;
-    --border-secondary: #333230;
-    --border-tertiary:  #2a2927;
-    --border-info:      #1e40af;
-    --border-danger:    #991b1b;
-  }
-}
-
-/* ── Base ── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 html, body {
-  font-family: var(--font-sans);
-  background: var(--bg-secondary);
-  color: var(--text-primary);
+  font-family: var(--sans);
+  background: var(--bg);
+  color: var(--text);
   min-height: 100vh;
   -webkit-tap-highlight-color: transparent;
 }
 
-/* ── Page chrome ── */
-.page-header {
-  padding: 14px 16px 0;
+/* ── Header ── */
+.header {
+  padding: 20px 18px 0;
 }
 
 .back-btn {
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  font-size: 13px;
-  color: var(--text-secondary);
+  font-size: 12px;
+  color: var(--text3);
   text-decoration: none;
-  padding: 6px 0;
+  padding: 4px 0;
+  margin-bottom: 14px;
+}
+.back-btn:hover { color: var(--text2); }
+
+.title-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
   margin-bottom: 4px;
 }
-.back-btn:hover { color: var(--text-primary); }
 
-.page-title {
-  font-size: 16px;
-  font-weight: 600;
-  color: var(--text-primary);
-  margin-bottom: 2px;
+.title {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text);
+  line-height: 1.25;
 }
 
-.page-subtitle {
+.subtitle {
   font-size: 12px;
-  color: var(--text-secondary);
-  margin-bottom: 0;
+  color: var(--text3);
+  margin-top: 3px;
+  line-height: 1.5;
 }
 
-.container {
-  padding: 10px 14px 40px;
-}
-
-/* ── sr-only ── */
-.sr-only {
-  position: absolute;
-  width: 1px; height: 1px;
-  padding: 0; margin: -1px;
-  overflow: hidden;
-  clip: rect(0,0,0,0);
+/* ── Phase badge ── */
+.phase-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 12px;
+  border-radius: 99px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  border: 1px solid;
   white-space: nowrap;
-  border: 0;
+  transition: background 0.4s, color 0.4s, border-color 0.4s;
 }
+.phase-pill .dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+  animation: pulse 1.4s ease-in-out infinite;
+}
+@keyframes pulse {
+  0%,100% { opacity: 1; }
+  50%      { opacity: 0.3; }
+}
+.phase-pill.explore  { color: var(--yellow); border-color: rgba(239,159,39,.3); background: rgba(239,159,39,.08); }
+.phase-pill.learn    { color: var(--blue);   border-color: rgba(55,138,221,.3); background: rgba(55,138,221,.08); }
+.phase-pill.converge { color: var(--green);  border-color: rgba(29,158,117,.3); background: rgba(29,158,117,.08); }
+.phase-pill.idle     { color: var(--text3);  border-color: var(--border);       background: transparent; }
 
-/* ── Original snippet styles (lightly adjusted for mobile) ── */
-.ctrl {
+/* ── Narrative bar ── */
+.narrative {
+  margin: 12px 18px 0;
+  padding: 10px 14px;
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  font-size: 12px;
+  color: var(--text2);
+  line-height: 1.6;
+  min-height: 44px;
+  transition: color 0.3s;
+}
+.narrative strong { color: var(--text); font-weight: 600; }
+
+/* ── Controls ── */
+.controls {
   display: flex;
   align-items: center;
   gap: 8px;
   flex-wrap: wrap;
-  margin-bottom: 12px;
+  padding: 14px 18px 0;
 }
 
 .btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
   padding: 8px 16px;
-  border-radius: var(--radius-md);
-  border: 0.5px solid var(--border-secondary);
+  border-radius: 8px;
+  border: 1px solid var(--border2);
   font-size: 13px;
+  font-weight: 500;
   cursor: pointer;
-  background: var(--bg-primary);
-  color: var(--text-primary);
-  transition: background 0.15s;
-  -webkit-tap-highlight-color: transparent;
+  background: var(--bg3);
+  color: var(--text);
+  transition: background 0.15s, border-color 0.15s;
   touch-action: manipulation;
 }
-.btn:hover, .btn:active { background: var(--bg-secondary); }
+.btn:hover, .btn:active { background: var(--surface); border-color: var(--border2); }
+.btn.primary {
+  background: var(--green);
+  border-color: var(--green);
+  color: #fff;
+}
+.btn.primary:hover, .btn.primary:active { filter: brightness(1.1); }
 
-.sl-grp {
+.step-badge {
+  font-size: 12px;
+  color: var(--text3);
+  font-family: var(--mono);
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  padding: 6px 10px;
+  border-radius: 7px;
+}
+
+.slider-group {
   display: flex;
   align-items: center;
   gap: 6px;
   font-size: 12px;
-  color: var(--text-secondary);
+  color: var(--text2);
 }
-
-/* Larger touch target for sliders on mobile */
-.sl-grp input[type="range"] {
+.slider-group input[type="range"] {
   width: 72px;
-  height: 36px;
+  height: 32px;
   cursor: pointer;
+  accent-color: var(--green);
+}
+.slider-val {
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--text);
+  min-width: 22px;
 }
 
+/* ── Metric grid ── */
 .grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 8px;
+  padding: 14px 18px 0;
 }
 
-/* 2-column on narrow screens */
 @media (max-width: 480px) {
   .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 
-.pnl {
-  border: 0.5px solid var(--border-tertiary);
-  border-radius: var(--radius-md);
-  padding: 10px 11px;
-  background: var(--bg-primary);
+.card {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 11px 12px;
+  position: relative;
+  overflow: hidden;
 }
 
-.pname {
-  font-size: 11px;
-  color: var(--text-tertiary);
-  margin-bottom: 2px;
+.card-accent {
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: var(--card-color);
+  opacity: 0.7;
 }
 
-.pval {
-  font-size: 19px;
-  font-weight: 500;
-  font-family: var(--font-mono);
+.card-label {
+  font-size: 10px;
+  color: var(--text3);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: 1px;
+}
+
+.card-name {
+  font-size: 12px;
+  color: var(--text2);
   margin-bottom: 6px;
-  line-height: 1;
-  color: var(--text-primary);
+  line-height: 1.3;
 }
 
-.pval span {
+.card-value {
+  font-size: 20px;
+  font-weight: 600;
+  font-family: var(--mono);
+  color: var(--card-color, var(--text));
+  line-height: 1;
+  margin-bottom: 7px;
+}
+
+.card-unit {
   font-size: 11px;
   font-weight: 400;
-  color: var(--text-tertiary);
-  margin-left: 4px;
-  font-family: var(--font-sans);
+  color: var(--text3);
+  margin-left: 3px;
+  font-family: var(--sans);
 }
 
-canvas { display: block; width: 100%; height: 58px; }
+canvas { display: block; width: 100%; height: 56px; }
 
-.step-disp {
-  font-size: 13px;
-  color: var(--text-secondary);
-  font-family: var(--font-mono);
-  min-width: 96px;
+/* ── Legend ── */
+.legend {
+  padding: 14px 18px 28px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+}
+
+@media (max-width: 480px) {
+  .legend { grid-template-columns: repeat(2, 1fr); }
+}
+
+.legend-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 7px;
+  padding: 8px 10px;
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+
+.legend-dot {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  margin-top: 3px;
+}
+
+.legend-text {
+  font-size: 10.5px;
+  color: var(--text3);
+  line-height: 1.5;
+}
+
+.legend-text strong {
+  display: block;
+  font-size: 11px;
+  color: var(--text2);
+  font-weight: 600;
+  margin-bottom: 1px;
 }
 </style>
 </head>
 <body>
 
-<div class="page-header">
-  <a href="index.html" class="back-btn">← 返回</a>
-  <div class="page-title">SAC 训练过程模拟器</div>
-  <div class="page-subtitle">Soft Actor-Critic · 六项关键指标实时动态</div>
+<div class="header">
+  <a href="index.html" class="back-btn">← Back</a>
+
+  <div class="title-row">
+    <div>
+      <div class="title">SAC Agent Training</div>
+      <div class="subtitle">Soft Actor-Critic · Live training simulation · 6 key metrics</div>
+    </div>
+    <div class="phase-pill idle" id="phasePill">
+      <span class="dot"></span>
+      <span id="phaseText">Not started</span>
+    </div>
+  </div>
 </div>
 
-<div class="container">
+<div class="narrative" id="narrative">
+  Press <strong>Start</strong> to begin the simulation. Watch how the agent learns over time — from random exploration to stable, high-reward behavior.
+</div>
 
-<h2 class="sr-only">SAC训练过程参数动态模拟器，展示六项关键指标的实时变化</h2>
-
-<div style="padding:.25rem 0">
-<div class="ctrl">
-  <button class="btn" id="playBtn" onclick="togglePlay()" style="min-width:76px">
-    <i class="ti ti-player-play" style="font-size:13px;vertical-align:-1px;margin-right:3px" aria-hidden="true"></i>开始
+<div class="controls">
+  <button class="btn primary" id="playBtn" onclick="togglePlay()">
+    <i class="ti ti-player-play" style="font-size:14px"></i> Start
   </button>
   <button class="btn" onclick="doReset()">
-    <i class="ti ti-refresh" style="font-size:13px;vertical-align:-1px;margin-right:3px" aria-hidden="true"></i>重置
+    <i class="ti ti-refresh" style="font-size:14px"></i> Reset
   </button>
-  <span class="step-disp" id="stepDisp">step: 0</span>
-  <div class="sl-grp">
-    速度
+  <span class="step-badge" id="stepDisp">step 0</span>
+  <div class="slider-group">
+    Speed
     <input type="range" min="1" max="30" value="6" id="spd"
       oninput="document.getElementById('spdV').textContent=this.value">
-    <span id="spdV" style="min-width:18px">6</span>×
+    <span class="slider-val" id="spdV">6</span>×
   </div>
-  <div class="sl-grp">
-    目标熵 H̄
+  <div class="slider-group">
+    Target entropy H̄
     <input type="range" min="-12" max="-1" value="-6" step="1" id="he"
       oninput="onHeChange(this.value)">
-    <span id="heV" style="min-width:26px">−6</span>
+    <span class="slider-val" id="heV">−6</span>
   </div>
 </div>
 
 <div class="grid">
-  <div class="pnl" id="pnl0">
-    <div class="pname">episode reward</div>
-    <div class="pval" id="v0">—</div>
+  <div class="card" style="--card-color:var(--green)">
+    <div class="card-accent"></div>
+    <div class="card-label">Objective</div>
+    <div class="card-name">Episode Reward</div>
+    <div class="card-value" id="v0">—</div>
     <canvas id="c0"></canvas>
   </div>
-  <div class="pnl" id="pnl1">
-    <div class="pname">critic loss J<sub>Q</sub></div>
-    <div class="pval" id="v1">—</div>
+  <div class="card" style="--card-color:var(--orange)">
+    <div class="card-accent"></div>
+    <div class="card-label">Critic</div>
+    <div class="card-name">Loss J<sub>Q</sub></div>
+    <div class="card-value" id="v1">—</div>
     <canvas id="c1"></canvas>
   </div>
-  <div class="pnl" id="pnl2">
-    <div class="pname">actor loss J<sub>π</sub></div>
-    <div class="pval" id="v2">—</div>
+  <div class="card" style="--card-color:var(--purple)">
+    <div class="card-accent"></div>
+    <div class="card-label">Actor</div>
+    <div class="card-name">Loss J<sub>π</sub></div>
+    <div class="card-value" id="v2">—</div>
     <canvas id="c2"></canvas>
   </div>
-  <div class="pnl" id="pnl3">
-    <div class="pname">policy entropy H(π)</div>
-    <div class="pval" id="v3">—<span id="heTarget"></span></div>
+  <div class="card" style="--card-color:var(--blue)">
+    <div class="card-accent"></div>
+    <div class="card-label">Exploration</div>
+    <div class="card-name">Policy Entropy H(π) <span id="heTarget" style="font-size:10px;color:var(--text3);font-family:var(--sans)"></span></div>
+    <div class="card-value" id="v3">—</div>
     <canvas id="c3"></canvas>
   </div>
-  <div class="pnl" id="pnl4">
-    <div class="pname">temperature α</div>
-    <div class="pval" id="v4">—</div>
+  <div class="card" style="--card-color:var(--yellow)">
+    <div class="card-accent"></div>
+    <div class="card-label">Auto-tuning</div>
+    <div class="card-name">Temperature α</div>
+    <div class="card-value" id="v4">—</div>
     <canvas id="c4"></canvas>
   </div>
-  <div class="pnl" id="pnl5">
-    <div class="pname">mean Q value</div>
-    <div class="pval" id="v5">—</div>
+  <div class="card" style="--card-color:var(--lime)">
+    <div class="card-accent"></div>
+    <div class="card-label">Value estimate</div>
+    <div class="card-name">Mean Q-value</div>
+    <div class="card-value" id="v5">—</div>
     <canvas id="c5"></canvas>
   </div>
 </div>
-</div>
 
-</div><!-- /container -->
+<div class="legend">
+  <div class="legend-item">
+    <div class="legend-dot" style="background:var(--green)"></div>
+    <div class="legend-text">
+      <strong>Episode Reward</strong>
+      Cumulative reward per episode. Rises as the agent improves its policy.
+    </div>
+  </div>
+  <div class="legend-item">
+    <div class="legend-dot" style="background:var(--orange)"></div>
+    <div class="legend-text">
+      <strong>Critic Loss J<sub>Q</sub></strong>
+      How wrong the value estimate is. Should fall and stabilise early on.
+    </div>
+  </div>
+  <div class="legend-item">
+    <div class="legend-dot" style="background:var(--purple)"></div>
+    <div class="legend-text">
+      <strong>Actor Loss J<sub>π</sub></strong>
+      Policy update signal. Grows negative as the actor extracts more value.
+    </div>
+  </div>
+  <div class="legend-item">
+    <div class="legend-dot" style="background:var(--blue)"></div>
+    <div class="legend-text">
+      <strong>Policy Entropy</strong>
+      Measures randomness. Converges to the target H̄ you set above.
+    </div>
+  </div>
+  <div class="legend-item">
+    <div class="legend-dot" style="background:var(--yellow)"></div>
+    <div class="legend-text">
+      <strong>Temperature α</strong>
+      Auto-tuned exploration weight. Adjusts to keep entropy at H̄.
+    </div>
+  </div>
+  <div class="legend-item">
+    <div class="legend-dot" style="background:var(--lime)"></div>
+    <div class="legend-text">
+      <strong>Mean Q-value</strong>
+      Average value estimate across state-action pairs. Rises with reward.
+    </div>
+  </div>
+</div>
 
 <script>
 const COLORS = ['#1D9E75','#D85A30','#7F77DD','#378ADD','#EF9F27','#639922'];
 const BUFLEN = 260;
 
-let bufs = Array.from({length:6},()=>[]);
+let bufs = Array.from({length:6}, ()=>[]);
 let step=0, log_alpha=Math.log(0.2), entropy=3.0, reward=-26, q_mean=-8;
 let playing=false, animId=null, lastTs=0, frameAcc=0;
 
-function n(s=1){return(Math.random()-0.5)*2*s}
-
-function getHe(){return parseInt(document.getElementById('he').value)}
-function getSpd(){return parseInt(document.getElementById('spd').value)}
+function n(s=1){ return (Math.random()-0.5)*2*s; }
+function getHe(){ return parseInt(document.getElementById('he').value); }
+function getSpd(){ return parseInt(document.getElementById('spd').value); }
 
 function onHeChange(v){
-  document.getElementById('heV').textContent='−'+Math.abs(v);
-  document.getElementById('heTarget').textContent=' (H̄='+v+')';
+  document.getElementById('heV').textContent = '−' + Math.abs(v);
+  document.getElementById('heTarget').textContent = '(H̄ = ' + v + ')';
 }
 
+/* ── Training simulation ── */
 function doStep(){
   step++;
-  const t=step;
-  const H=getHe();
+  const t = step, H = getHe();
 
-  const grad=-(entropy-H);
-  log_alpha+=3e-3*grad+n(0.012);
-  log_alpha=Math.max(-5,Math.min(2.5,log_alpha));
-  const alpha=Math.exp(log_alpha);
+  const grad = -(entropy - H);
+  log_alpha += 3e-3*grad + n(0.012);
+  log_alpha = Math.max(-5, Math.min(2.5, log_alpha));
+  const alpha = Math.exp(log_alpha);
 
-  const nat_e=H+3.5*Math.exp(-t/600);
-  entropy+=0.01*(nat_e-entropy)+n(0.09);
+  const nat_e = H + 3.5*Math.exp(-t/600);
+  entropy += 0.01*(nat_e - entropy) + n(0.09);
 
-  const q_loss=Math.max(0.04,28*Math.exp(-t/700)+0.35+Math.abs(n(1.8)));
+  const q_loss = Math.max(0.04, 28*Math.exp(-t/700) + 0.35 + Math.abs(n(1.8)));
 
-  const qTarget=-4+18*(1-Math.exp(-t/900));
-  q_mean+=0.018*(qTarget-q_mean)+n(0.22);
+  const qTarget = -4 + 18*(1 - Math.exp(-t/900));
+  q_mean += 0.018*(qTarget - q_mean) + n(0.22);
 
-  reward=-26+24/(1+Math.exp(-0.007*(t-450)))+n(1.4);
+  reward = -26 + 24/(1 + Math.exp(-0.007*(t-450))) + n(1.4);
 
-  const actor_loss=-(0.25+3.0*(1-Math.exp(-t/650)))+n(0.22);
+  const actor_loss = -(0.25 + 3.0*(1 - Math.exp(-t/650))) + n(0.22);
 
-  const vals=[reward,q_loss,actor_loss,entropy,alpha,q_mean];
+  const vals = [reward, q_loss, actor_loss, entropy, alpha, q_mean];
   vals.forEach((v,i)=>{
     bufs[i].push(v);
-    if(bufs[i].length>BUFLEN)bufs[i].shift();
+    if(bufs[i].length > BUFLEN) bufs[i].shift();
   });
   return vals;
 }
 
-function drawSparkline(idx,color,targetVal){
-  const cv=document.getElementById('c'+idx);
-  const buf=bufs[idx];
-  if(!cv||buf.length<2)return;
-  const dpr=devicePixelRatio||1;
-  const W=cv.clientWidth,H=cv.clientHeight;
-  if(cv.width!==W*dpr||cv.height!==H*dpr){cv.width=W*dpr;cv.height=H*dpr;}
-  const ctx=cv.getContext('2d');
+/* ── Phase & narrative ── */
+function updatePhase(){
+  const pill = document.getElementById('phasePill');
+  const txt  = document.getElementById('phaseText');
+  const nar  = document.getElementById('narrative');
+
+  if(!playing && step === 0){
+    pill.className = 'phase-pill idle';
+    txt.textContent = 'Not started';
+    nar.innerHTML = 'Press <strong>Start</strong> to begin the simulation. Watch how the agent learns over time — from random exploration to stable, high-reward behavior.';
+    return;
+  }
+  if(!playing){
+    pill.className = 'phase-pill idle';
+    txt.textContent = 'Paused';
+    return;
+  }
+
+  if(step < 300){
+    pill.className = 'phase-pill explore';
+    txt.textContent = 'Exploration';
+    nar.innerHTML = '<strong>Exploration phase.</strong> The agent takes mostly random actions to gather experience. Reward is low, entropy is high — the policy is deliberately unpredictable so it can discover what works.';
+  } else if(step < 800){
+    pill.className = 'phase-pill learn';
+    txt.textContent = 'Learning';
+    nar.innerHTML = '<strong>Learning phase.</strong> The critic is fitting the value function — watch critic loss fall. The actor starts exploiting what the critic learned: reward climbs, entropy begins converging toward the target H̄.';
+  } else {
+    pill.className = 'phase-pill converge';
+    txt.textContent = 'Converging';
+    nar.innerHTML = '<strong>Convergence.</strong> Reward stabilises near its maximum. Temperature α has auto-tuned to keep policy entropy at H̄. The agent has found a near-optimal, reproducible strategy.';
+  }
+}
+
+/* ── Sparkline renderer ── */
+function drawSparkline(idx, color, targetVal){
+  const cv  = document.getElementById('c'+idx);
+  const buf = bufs[idx];
+  if(!cv || buf.length < 2) return;
+
+  const dpr = devicePixelRatio || 1;
+  const W = cv.clientWidth, H = cv.clientHeight;
+  if(cv.width !== W*dpr || cv.height !== H*dpr){ cv.width=W*dpr; cv.height=H*dpr; }
+
+  const ctx = cv.getContext('2d');
   ctx.setTransform(dpr,0,0,dpr,0,0);
   ctx.clearRect(0,0,W,H);
 
-  const mn=Math.min(...buf),mx=Math.max(...buf);
-  const pad=Math.max(Math.abs(mx-mn)*0.12,0.4);
-  const lo=mn-pad,hi=mx+pad;
-  const tx=(k)=>k/(buf.length-1)*(W-2)+1;
-  const ty=(v)=>H-0.05*H-(v-lo)/(hi-lo)*H*0.9;
+  const mn=Math.min(...buf), mx=Math.max(...buf);
+  const pad=Math.max(Math.abs(mx-mn)*0.12, 0.4);
+  const lo=mn-pad, hi=mx+pad;
+  const tx = k => k/(buf.length-1)*(W-2)+1;
+  const ty = v => H - 0.05*H - (v-lo)/(hi-lo)*H*0.9;
 
-  if(targetVal!==undefined){
-    const ty0=ty(targetVal);
-    if(ty0>0&&ty0<H){
+  if(targetVal !== undefined){
+    const ty0 = ty(targetVal);
+    if(ty0 > 0 && ty0 < H){
       ctx.save();
-      ctx.strokeStyle=color+'50';
-      ctx.lineWidth=1;
+      ctx.strokeStyle = color+'60';
+      ctx.lineWidth = 1;
       ctx.setLineDash([3,4]);
-      ctx.beginPath();ctx.moveTo(0,ty0);ctx.lineTo(W,ty0);ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(0,ty0); ctx.lineTo(W,ty0); ctx.stroke();
       ctx.restore();
     }
   }
 
   ctx.beginPath();
-  ctx.moveTo(tx(0),ty(buf[0]));
-  for(let k=1;k<buf.length;k++)ctx.lineTo(tx(k),ty(buf[k]));
-  ctx.lineTo(tx(buf.length-1),H);
-  ctx.lineTo(0,H);
+  ctx.moveTo(tx(0), ty(buf[0]));
+  for(let k=1; k<buf.length; k++) ctx.lineTo(tx(k), ty(buf[k]));
+  ctx.lineTo(tx(buf.length-1), H);
+  ctx.lineTo(0, H);
   ctx.closePath();
-  ctx.fillStyle=color+'15';
+  ctx.fillStyle = color+'18';
   ctx.fill();
 
   ctx.beginPath();
-  ctx.moveTo(tx(0),ty(buf[0]));
-  for(let k=1;k<buf.length;k++)ctx.lineTo(tx(k),ty(buf[k]));
-  ctx.strokeStyle=color;
-  ctx.lineWidth=1.5;
-  ctx.lineJoin='round';
+  ctx.moveTo(tx(0), ty(buf[0]));
+  for(let k=1; k<buf.length; k++) ctx.lineTo(tx(k), ty(buf[k]));
+  ctx.strokeStyle = color;
+  ctx.lineWidth = 1.8;
+  ctx.lineJoin = 'round';
   ctx.setLineDash([]);
   ctx.stroke();
 }
 
 function fmt(v,i){
-  if(i===0)return v.toFixed(1);
-  if(i===1)return v.toFixed(3);
-  if(i===2)return v.toFixed(3);
-  if(i===3)return v.toFixed(2);
-  if(i===4)return v.toFixed(4);
-  if(i===5)return v.toFixed(2);
+  return [v.toFixed(1), v.toFixed(3), v.toFixed(3), v.toFixed(2), v.toFixed(4), v.toFixed(2)][i];
 }
 
+/* ── Animation loop ── */
 function renderFrame(ts){
-  if(!playing)return;
-  const dt=ts-lastTs;lastTs=ts;
-  frameAcc+=dt;
-  const interval=1000/25;
-  if(frameAcc>=interval){
-    frameAcc-=interval;
-    const spd=getSpd();
+  if(!playing) return;
+  const dt = ts - lastTs; lastTs = ts;
+  frameAcc += dt;
+  const interval = 1000/25;
+  if(frameAcc >= interval){
+    frameAcc -= interval;
+    const spd = getSpd();
     let vals;
-    for(let k=0;k<spd;k++)vals=doStep();
-    vals.forEach((v,i)=>document.getElementById('v'+i).textContent=fmt(v,i));
-    document.getElementById('stepDisp').textContent='step: '+step.toLocaleString();
-    const He=getHe();
-    for(let i=0;i<6;i++)drawSparkline(i,COLORS[i],i===3?He:undefined);
+    for(let k=0; k<spd; k++) vals = doStep();
+    vals.forEach((v,i) => document.getElementById('v'+i).textContent = fmt(v,i));
+    document.getElementById('stepDisp').textContent = 'step ' + step.toLocaleString();
+    const He = getHe();
+    for(let i=0; i<6; i++) drawSparkline(i, COLORS[i], i===3 ? He : undefined);
+    updatePhase();
   }
-  animId=requestAnimationFrame(renderFrame);
+  animId = requestAnimationFrame(renderFrame);
 }
 
 function togglePlay(){
-  playing=!playing;
-  const btn=document.getElementById('playBtn');
+  playing = !playing;
+  const btn = document.getElementById('playBtn');
   if(playing){
-    btn.innerHTML='<i class="ti ti-player-pause" style="font-size:13px;vertical-align:-1px;margin-right:3px" aria-hidden="true"></i>暂停';
-    lastTs=performance.now();frameAcc=0;
-    animId=requestAnimationFrame(renderFrame);
-  }else{
-    btn.innerHTML='<i class="ti ti-player-play" style="font-size:13px;vertical-align:-1px;margin-right:3px" aria-hidden="true"></i>继续';
-    if(animId)cancelAnimationFrame(animId);
+    btn.innerHTML = '<i class="ti ti-player-pause" style="font-size:14px"></i> Pause';
+    btn.classList.remove('primary');
+    btn.style.background = '';
+    lastTs = performance.now(); frameAcc = 0;
+    animId = requestAnimationFrame(renderFrame);
+  } else {
+    btn.innerHTML = '<i class="ti ti-player-play" style="font-size:14px"></i> Resume';
+    btn.classList.add('primary');
+    if(animId) cancelAnimationFrame(animId);
+    updatePhase();
   }
 }
 
 function doReset(){
-  playing=false;
-  if(animId)cancelAnimationFrame(animId);
-  document.getElementById('playBtn').innerHTML='<i class="ti ti-player-play" style="font-size:13px;vertical-align:-1px;margin-right:3px" aria-hidden="true"></i>开始';
-  bufs=Array.from({length:6},()=>[]);
-  step=0;log_alpha=Math.log(0.2);entropy=3.0;reward=-26;q_mean=-8;
-  document.getElementById('stepDisp').textContent='step: 0';
-  for(let i=0;i<6;i++){
-    document.getElementById('v'+i).textContent='—';
-    const cv=document.getElementById('c'+i);
-    if(cv){const ctx=cv.getContext('2d');ctx.clearRect(0,0,cv.width,cv.height);}
+  playing = false;
+  if(animId) cancelAnimationFrame(animId);
+  const btn = document.getElementById('playBtn');
+  btn.innerHTML = '<i class="ti ti-player-play" style="font-size:14px"></i> Start';
+  btn.classList.add('primary');
+  bufs = Array.from({length:6}, ()=>[]);
+  step=0; log_alpha=Math.log(0.2); entropy=3.0; reward=-26; q_mean=-8;
+  document.getElementById('stepDisp').textContent = 'step 0';
+  for(let i=0; i<6; i++){
+    document.getElementById('v'+i).textContent = '—';
+    const cv = document.getElementById('c'+i);
+    if(cv){ const ctx=cv.getContext('2d'); ctx.clearRect(0,0,cv.width,cv.height); }
   }
+  updatePhase();
 }
 
 onHeChange(document.getElementById('he').value);
+updatePhase();
 </script>
 </body>
 </html>
