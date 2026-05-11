@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>动态仿真演示</title>
+<title>RL Simulation Demos</title>
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -161,40 +161,40 @@ html, body {
 <body>
 
 <div class="hero">
-  <div class="hero-label">深度强化学习 · 交互演示</div>
-  <div class="hero-title">动态仿真<br>演示集</div>
-  <div class="hero-sub">选择一个演示，在手机上实时交互</div>
+  <div class="hero-label">Deep Reinforcement Learning · Interactive Demo</div>
+  <div class="hero-title">RL Simulation<br>Demos</div>
+  <div class="hero-sub">Select a demo and interact with it live on your phone</div>
 </div>
 
 <div class="cards">
 
   <a href="sac.html" class="card" style="--accent:#1D9E75; --accent-glow:rgba(29,158,117,0.06)">
-    <div class="card-tag">强化学习算法</div>
-    <div class="card-title">SAC 训练过程模拟器</div>
+    <div class="card-tag">RL Algorithm</div>
+    <div class="card-title">SAC Agent Training</div>
     <div class="card-desc">
-      实时展示 Soft Actor-Critic 训练中六项关键指标的动态变化——episode reward、critic / actor loss、策略熵、温度系数 α 与均值 Q。支持速度调节与目标熵交互。
+      Watch a Soft Actor-Critic agent learn in real time — episode reward, critic &amp; actor loss, policy entropy, temperature α, and mean Q-value. Control training speed and target entropy interactively.
     </div>
     <div class="card-footer">
       <div class="card-pills">
-        <span class="pill">6 指标</span>
-        <span class="pill">速度控制</span>
-        <span class="pill">目标熵调节</span>
+        <span class="pill">6 metrics</span>
+        <span class="pill">Speed control</span>
+        <span class="pill">Target entropy</span>
       </div>
       <span class="card-arrow">→</span>
     </div>
   </a>
 
   <a href="ddic.html" class="card" style="--accent:#378ADD; --accent-glow:rgba(55,138,221,0.06)">
-    <div class="card-tag">电力系统 · 多智能体</div>
-    <div class="card-title">DDIC 四智能体 Kundur 系统</div>
+    <div class="card-tag">Power System · Multi-Agent</div>
+    <div class="card-title">DDIC 4-Agent Kundur System</div>
     <div class="card-desc">
-      Modified Kundur 双区域电力系统上的分布式动态惯量-下垂控制。4 个 ESS 储能智能体通过 MARL (SAC) 协同抑制频率扰动，支持 No Control / DDIC 对比模式。
+      Distributed Dynamic Inertia-Droop Control on the modified Kundur two-area power grid. Four ESS agents trained with MARL (SAC) cooperatively suppress frequency deviations. Compare No Control vs. DDIC live.
     </div>
     <div class="card-footer">
       <div class="card-pills">
-        <span class="pill">4 ESS 智能体</span>
-        <span class="pill">频率偏差实时图</span>
-        <span class="pill">⚡ 扰动注入</span>
+        <span class="pill">4 ESS agents</span>
+        <span class="pill">Live Δf chart</span>
+        <span class="pill">⚡ Disturbance</span>
       </div>
       <span class="card-arrow">→</span>
     </div>
@@ -203,7 +203,7 @@ html, body {
 </div>
 
 <div class="footer">
-  扫描二维码即可在手机上访问 <span class="dot"></span> 点击卡片进入演示
+  Scan the QR code to open on your phone <span class="dot"></span> Tap a card to enter
 </div>
 
 </body>
