@@ -202,7 +202,7 @@ function cp(){
   const p=15,a1={x:p,y:28,w:gW*.34,h:gH-p-22},a2={x:gW*.38,y:28,w:gW-gW*.38-p,h:gH-p-22};
   Object.assign(gp,{a1,a2,
     G1:{x:a1.x+a1.w*.27,y:a1.y+a1.h*.24},G2:{x:a1.x+a1.w*.27,y:a1.y+a1.h*.70},
-    W2:{x:a1.x+a1.w*.70,y:a1.y+a1.h*.47},
+    W2:{x:a2.x+a2.w*.10,y:a2.y+a2.h*.47},
     G3:{x:a2.x+a2.w*.82,y:a2.y+a2.h*.22},W1:{x:a2.x+a2.w*.82,y:a2.y+a2.h*.68},
     ES:[
       {x:a2.x+a2.w*.16,y:a2.y+a2.h*.19},
@@ -263,9 +263,10 @@ function dGrid(wc){
   c.strokeStyle=ls;c.lineWidth=2;
   c.beginPath();c.moveTo(a1.x+a1.w,ty1);c.lineTo(a2.x,ty1);c.moveTo(a1.x+a1.w,ty2);c.lineTo(a2.x,ty2);c.stroke();
   c.lineWidth=1.5;c.lineCap='round';
-  [[G1,G2],[G1,W2],[G2,W2],
-   [W2,{x:a1.x+a1.w,y:ty1}],[W2,{x:a1.x+a1.w,y:ty2}],
-   [{x:a2.x,y:ty1},ES[0]],[{x:a2.x,y:ty2},ES[2]],
+  [[G1,G2],
+   [G1,{x:a1.x+a1.w,y:ty1}],[G2,{x:a1.x+a1.w,y:ty2}],
+   [{x:a2.x,y:ty1},W2],[{x:a2.x,y:ty2},W2],
+   [W2,ES[0]],[W2,ES[2]],
    [ES[0],G3],[ES[0],ES[3]],
    [ES[3],ES[2]],[ES[3],W1],[ES[1],W1],[ES[1],ES[3]]
   ].forEach(([a,b])=>{c.beginPath();c.moveTo(a.x,a.y);c.lineTo(b.x,b.y);c.strokeStyle=ls;c.stroke();});
